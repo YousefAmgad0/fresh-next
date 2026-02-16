@@ -1,17 +1,15 @@
-import { getLoggedUserWishlist, reomveWishlistItem } from "@/app/_actions/wishlist.action";
-import { Button } from "@/components/ui/button";
-import DeleteWishlistButton from "@/components/wishlist/DeleteWishlistButton";
+import { getLoggedUserWishlist } from "@/app/_actions/wishlist.action";
 import { WishlistI } from "@/interfaces/wishlist";
 import { Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import DeleteWishlistButton from "@/components/wishlist/DeleteWishlistButton";
 
 export default async function Wishlist() {
   const { data } = await getLoggedUserWishlist();
-  const productWishlist: WishlistI[] = data;
-  // console.log(productWishlist, "Product Wishlisttt");
 
- 
+  // تأكد إن productWishlist دايمًا array
+  const productWishlist: WishlistI[] = data || [];
 
   return (
     <div className="container mx-auto py-10">
@@ -26,7 +24,7 @@ export default async function Wishlist() {
           {productWishlist.map((product) => (
             <div
               key={product._id}
-              className="border rounded-xl p-4 shadow-sm "
+              className="border rounded-xl p-4 shadow-sm"
             >
               <Link href={`/products/${product._id}`}>
                 <Image
@@ -36,21 +34,18 @@ export default async function Wishlist() {
                   height={300}
                   className="w-full h-48 object-cover rounded-lg"
                 />
-
-                <h3 className="mt-3 line-clamp-1 font-bold ">{product.title}</h3>
-
+                <h3 className="mt-3 line-clamp-1 font-bold">{product.title}</h3>
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-green-600 font-bold">
                     {product.price} EGP
                   </span>
-
                   <span className="text-yellow-500">
                     ⭐ {product.ratingsAverage}
                   </span>
                 </div>
               </Link>
 
-              <DeleteWishlistButton prodID={product._id}/>
+              <DeleteWishlistButton prodID={product._id} />
             </div>
           ))}
         </div>
@@ -58,4 +53,3 @@ export default async function Wishlist() {
     </div>
   );
 }
-//reomveWishlistItem
