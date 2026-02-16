@@ -2,25 +2,23 @@ import { getLoggedUserID } from "@/app/_actions/cart.action";
 import { GetUserOrders } from "@/services/allorders.services";
 import { OrderI } from "@/interfaces/orders";
 
+// ✅ يجعل الصفحة ديناميكية ويتيح استخدام cookies
+export const dynamic = 'force-dynamic';
+
 export default async function AllOrders() {
   try {
-    // 1. جلب userID
     const userID = await getLoggedUserID();
-
-    // 2. جلب الطلبات
     const ordersData = await GetUserOrders(userID);
     const userOrders: OrderI[] = ordersData || [];
 
-    // 3. إذا مفيش طلبات
     if (!userOrders.length) {
       return (
         <div className="text-center py-12">
-          <p className="text-gray-600 text-lg">No Orders </p>
+          <p className="text-gray-600 text-lg">No Orders</p>
         </div>
       );
     }
 
-    // 4. عرض الطلبات
     return (
       <main className="space-y-6 py-6">
         {userOrders.map((order) => (
@@ -81,16 +79,13 @@ export default async function AllOrders() {
       </main>
     );
   } catch (error) {
-    // التعامل مع أي خطأ (عدم تسجيل الدخول، فشل الشبكة، إلخ)
     console.error("Error in AllOrders:", error);
     return (
       <div className="text-center py-12">
         <p className="text-red-600 text-lg">
           {error instanceof Error ? error.message : "حدث خطأ غير متوقع"}
         </p>
-        <p className="text-gray-600 mt-2">
-         Try Again
-        </p>
+        <p className="text-gray-600 mt-2">Try Again</p>
       </div>
     );
   }
