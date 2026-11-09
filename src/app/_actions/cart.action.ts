@@ -5,7 +5,7 @@ import { jwtDecode } from "jwt-decode";
 
 export async function addToCart(productId: string) {
   const token = await getUserToken();
-  if (!token) throw new Error("You Must Logged in To Add To Cart");  
+  if (!token) throw new Error("You Must Logged in To Add To Cart");
 
   const resposne = await fetch("https://ecommerce.routemisr.com/api/v1/cart", {
     method: "POST",
@@ -131,12 +131,15 @@ export async function clearUserCart() {
 /***************************************************************************************************** */
 // Checkout - Stripe
 /***************************************************************************************************** */
-export async function checkOutAction(cartID: string, shippingList: ShippingListType) {
+export async function checkOutAction(
+  cartID: string,
+  shippingList: ShippingListType,
+) {
   const token = await getUserToken();
   if (!token) throw new Error("You must be logged in to checkout");
 
   const response = await fetch(
-    `https://ecommerce.routemisr.com/api/v1/orders/checkout-session/${cartID}?url=http://localhost:3000`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}/orders/checkout-session/${cartID}?url=${process.env.NEXT_PUBLIC_APP_URL}`,
     {
       method: "POST",
       body: JSON.stringify({ shippingList }),
@@ -144,7 +147,7 @@ export async function checkOutAction(cartID: string, shippingList: ShippingListT
         token,
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   const data = await response.json();
@@ -154,18 +157,24 @@ export async function checkOutAction(cartID: string, shippingList: ShippingListT
 /***************************************************************************************************** */
 // Checkout - Cash Order
 /***************************************************************************************************** */
-export async function createCashOrder(cartID: string, shippingAddress: ShippingListType) {
+export async function createCashOrder(
+  cartID: string,
+  shippingAddress: ShippingListType,
+) {
   const token = await getUserToken();
   if (!token) throw new Error("You must be logged in to place a cash order");
 
-  const response = await fetch(`https://ecommerce.routemisr.com/api/v1/orders/${cartID}`, {
-    method: "POST",
-    body: JSON.stringify({ shippingAddress }),
-    headers: {
-      token,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `https://ecommerce.routemisr.com/api/v1/orders/${cartID}`,
+    {
+      method: "POST",
+      body: JSON.stringify({ shippingAddress }),
+      headers: {
+        token,
+        "Content-Type": "application/json",
+      },
     },
-  });
+  );
 
   const data = await response.json();
   return data;
@@ -177,7 +186,7 @@ export async function createCashOrder(cartID: string, shippingAddress: ShippingL
 export async function checkoutType(
   cartID: string,
   shippingAddress: ShippingListType,
-  type: "stripe" | "cash"
+  type: "stripe" | "cash",
 ) {
   if (type === "stripe") {
     return await checkOutAction(cartID, shippingAddress);
@@ -189,5 +198,3 @@ export async function checkoutType(
 
   throw new Error("Invalid payment type");
 }
-
-

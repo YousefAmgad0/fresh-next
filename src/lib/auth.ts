@@ -6,7 +6,7 @@ export async function getUserToken() {
   const decodedToken = cookieStore.get("next-auth.session-token")?.value;
   const token = await decode({
     token: decodedToken,
-    secret: process.env.AUTH_SECRET!,
+    secret: process.env.NEXTAUTH_SECRET!,
   });
   return token?.token as string; // إرجاع التوكن الأصلي المخزن في الحقل token
 }

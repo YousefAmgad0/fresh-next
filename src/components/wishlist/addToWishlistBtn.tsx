@@ -1,31 +1,42 @@
 "use client";
+
 import { addToWishlist } from "@/app/_actions/wishlist.action";
 import { CartContext } from "@/providers/cart-provider";
 import React, { useContext, useState } from "react";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 
 export default function AddToWishlistBtn({ productID }: { productID: string }) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const { handleCart } = useContext(CartContext);
 
   async function addProductToWishlist(productID: string) {
     try {
       setLoading(true);
+
       const response = await addToWishlist(productID);
-      // console.log(response, "Add To Wishlist");
+
       if (response.status == "success") {
         toast.success(response.message, { position: "top-center" });
+        handleCart();
       }
-      handleCart();
-    } catch (error: any) {
-      toast.error(error.message, { position: "top-center" });
-      redirect("/login");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message, { position: "top-center" });
+
+        if (error.message === "You Must Logged in To Add To Wishlist") {
+          router.push("/login");
+        }
+      } else {
+        toast.error("Something went wrong", { position: "top-center" });
+      }
     } finally {
       setLoading(false);
     }
   }
+
   return (
     <>
       {loading ? (
