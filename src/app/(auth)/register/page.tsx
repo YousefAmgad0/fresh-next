@@ -1,23 +1,24 @@
+
 "use client";
+
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-
-import {
-  registerSchema,
-  RegisterSchemaType,
-} from "@/lib/validationSchema/auth.schema";
-import { signUpUser } from "@/services/auth.services";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
+
+import { registerSchema } from "@/lib/validationSchema/auth.schema";
+import type { RegisterSchemaType } from "@/lib/validationSchema/auth.schema";
+import { signUpUser } from "@/services/auth.services";
 
 export default function Register() {
   const router = useRouter();
+
   const form = useForm<RegisterSchemaType>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -30,27 +31,33 @@ export default function Register() {
   });
 
   async function handleRegister(values: RegisterSchemaType) {
-    console.log(values);
-    const response = await signUpUser(values);
-    // console.log(response, "Sign Up");
-    if (response.message == "success") {
-      toast.success("Successful Register");
-      router.push("/login");
-    } else toast.error(response.message);
+    try {
+      const response = await signUpUser(values);
+
+      if (response.message === "success") {
+        toast.success("Successful Register");
+        router.push("/login");
+      } else {
+        toast.error(response.message || "Registration failed");
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    }
   }
 
   return (
-    <main className="py-10 min-h-screen">
-      <div className="container mx-auto text-center space-y-4">
-        <h2 className="text-8xl font-bold">Join Us</h2>
-        <p className="text-2xl text-gray-400">Register Now in Shop Mart</p>
+    <main className="min-h-screen py-10">
+      <div className="container mx-auto space-y-4 text-center">
+        <h2 className="text-4xl font-bold">Join Us</h2>
+        <p className="text-2xl text-gray-400">
+          Register Now in Shop Mart
+        </p>
       </div>
 
       <form
         onSubmit={form.handleSubmit(handleRegister)}
-        className="max-w-lg border rounded-lg mx-auto shadow-xl p-6 my-4 space-y-5"
+        className="mx-auto my-4 max-w-lg space-y-5 rounded-lg border p-6 shadow-xl"
       >
-        {/* Name */}
         <Controller
           name="name"
           control={form.control}
@@ -65,7 +72,6 @@ export default function Register() {
           )}
         />
 
-        {/* Email */}
         <Controller
           name="email"
           control={form.control}
@@ -80,7 +86,6 @@ export default function Register() {
           )}
         />
 
-        {/* Password */}
         <Controller
           name="password"
           control={form.control}
@@ -95,13 +100,12 @@ export default function Register() {
           )}
         />
 
-        {/* RePassword */}
         <Controller
           name="rePassword"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field>
-              <FieldLabel htmlFor="rePassword">Re-Password</FieldLabel>
+              <FieldLabel htmlFor="rePassword">Confirm Password</FieldLabel>
               <Input id="rePassword" type="password" {...field} />
               {fieldState.error && (
                 <FieldError>{fieldState.error.message}</FieldError>
@@ -110,7 +114,6 @@ export default function Register() {
           )}
         />
 
-        {/* Phone */}
         <Controller
           name="phone"
           control={form.control}
@@ -125,7 +128,11 @@ export default function Register() {
           )}
         />
 
-        <Button type="submit" className="w-full cursor-pointer">
+        <Button
+          type="submit"
+          disabled={form.formState.isSubmitting}
+          className="w-full cursor-pointer"
+        >
           {form.formState.isSubmitting ? <Spinner /> : "Register"}
         </Button>
       </form>

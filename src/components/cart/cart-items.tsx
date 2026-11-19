@@ -1,117 +1,143 @@
 import {
-  clearUserCart,
-  reomveCartItem,
+  removeCartItem,
   updateCartProductQuantity,
 } from "@/app/_actions/cart.action";
-import { CartProductI } from "@/interfaces/cart";
+import type { CartProductI } from "@/interfaces/cart";
+import { CartContext } from "@/providers/cart-provider";
 import { Trash2 } from "lucide-react";
 import React, { useContext, useState } from "react";
-import { Button } from "../ui/button";
 import { toast } from "sonner";
+import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
-import { CartContext } from "@/providers/cart-provider";
 
 export default function CartItems({
   product,
   setProduct,
- 
 }: {
   product: CartProductI;
   setProduct: (products: CartProductI[]) => void;
- 
 }) {
   const [loading, setLoading] = useState(false);
 
+  const { handleCart } = useContext(CartContext);
 
-
-  /************************************************************************************ */
+  // Delete Product From Cart
   async function deleteProduct(id: string) {
     try {
       setLoading(true);
-      const data = await reomveCartItem(id);
-      // console.log(data);
-      if (data.status == "success") {
-        toast.success("Product Deleted", { position: "top-center" });
+
+      const data = await removeCartItem(id);
+
+      if (data.status !== "success" || !data.data?.products) {
+        throw new Error(data.message || "Could not delete this product");
       }
+
       setProduct(data.data.products);
-      handleCart()
+      handleCart();
+
+      toast.success("Product Deleted", {
+        position: "top-center",
+      });
     } catch (error) {
-      toast.error("Can Not Delete This Item", { position: "top-center" });
+      toast.error(
+        error instanceof Error ? error.message : "Can Not Delete This Item",
+        { position: "top-center" },
+      );
     } finally {
       setLoading(false);
     }
   }
-  /************************************************************************************* */
-  const {handleCart}=useContext(CartContext)
-  /************************************************************************************* */
-  async function UpdateProductCount(id: string, newCount: number) {
+
+  // Update Product Quantity
+  async function updateProductCount(id: string, newCount: number) {
     try {
       setLoading(true);
+
       const data = await updateCartProductQuantity(id, newCount);
-      // console.log(data, "Update Count ");
-      toast.success("Quantity has Been Updated", { position: "top-center" });
+
+      if (data.status !== "success" || !data.data?.products) {
+        throw new Error(data.message || "Could not update product quantity");
+      }
+
       setProduct(data.data.products);
-      handleCart()
+      handleCart();
+
+      toast.success("Quantity has Been Updated", {
+        position: "top-center",
+      });
     } catch (error) {
-      console.log(error, "Error in Update quantity");
-      toast.error("has Error in updating", { position: "top-center" });
+      toast.error(
+        error instanceof Error ? error.message : "Error in updating quantity",
+        { position: "top-center" },
+      );
     } finally {
       setLoading(false);
     }
   }
-  /*************************************************************************************** */
 
   return (
-    <div className="flex items-center justify-between rounded-xl border p-4 shadow-sm bg-white">
+    <div className="flex items-center justify-between rounded-xl border bg-white p-4 shadow-sm">
       {/* Product Left */}
       <div className="flex items-center gap-4">
         <img
           src={product.product.imageCover}
           alt={product.product.title}
-          className="w-24 h-24 rounded-lg object-cover md:w-28 md:h-28"
+          className="h-24 w-24 rounded-lg object-cover md:h-28 md:w-28"
         />
+
         <div>
-          <h3 className="font-semibold text-base md:text-lg line-clamp-2">
+          <h3 className="line-clamp-2 text-base font-semibold md:text-lg">
             {product.product.title}
           </h3>
-          <p className="text-sm text-muted-foreground mt-1">
+
+          <p className="mt-1 text-sm text-muted-foreground">
             {product.product.brand.name} | {product.product.category.name}
           </p>
+
           <div className="flex items-center">
             <Button
-            disabled={loading}
-            onClick={() =>
-              UpdateProductCount(product.product._id, product.count - 1)
-            }
-            className="w-5 h-5 rounded-lg border  bg-black  cursor-pointer"
-          >
-            {loading ? <Spinner /> : "-"}
-          </Button>
-          <span className="w-6 text-center font-medium">{product.count}</span>
-          <Button
-            disabled={loading}
-            onClick={() =>
-              UpdateProductCount(product.product._id, product.count + 1)
-            }
-            className="w-5 h-5 rounded-lg border  bg-black  cursor-pointer"
-          >
-            {loading ? <Spinner /> : "+"}
-          </Button>
+              type="button"
+              disabled={loading || product.count <= 1}
+              onClick={() =>
+                updateProductCount(product.product._id, product.count - 1)
+              }
+              className="h-5 w-5 cursor-pointer rounded-lg border bg-black"
+            >
+              {loading ? <Spinner /> : "-"}
+            </Button>
+
+            <span className="w-6 text-center font-medium">{product.count}</span>
+
+            <Button
+              type="button"
+              disabled={loading}
+              onClick={() =>
+                updateProductCount(product.product._id, product.count + 1)
+              }
+              className="h-5 w-5 cursor-pointer rounded-lg border bg-black"
+            >
+              {loading ? <Spinner /> : "+"}
+            </Button>
           </div>
         </div>
-
       </div>
 
       {/* Product Right */}
       <div className="flex items-center gap-6">
-        <span className="text-xs text-gray-500">{product.price}*{product.count}</span>
-        <div className="font-semibold">{product.price*product.count}</div>
+        <span className="text-xs text-gray-500">
+          {product.price} * {product.count}
+        </span>
+
+        <div className="font-semibold">{product.price * product.count}</div>
+
         <Button
+          type="button"
           disabled={loading}
           onClick={() => deleteProduct(product.product._id)}
-          className="flex items-center text-sm text-red-600 hover:underline gap-1 bg-transparent hover:bg-transparent cursor-pointer"
+          className="flex cursor-pointer items-center gap-1 bg-transparent text-sm text-red-600 hover:bg-transparent hover:underline"
         >
-          <Trash2 size={16} /> {loading ? <Spinner /> : "Remove"}
+          <Trash2 size={16} />
+          {loading ? <Spinner /> : "Remove"}
         </Button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -24,14 +25,13 @@ import { CartContext } from "@/providers/cart-provider";
 import { Spinner } from "../ui/spinner";
 
 export default function Navbar() {
-  const { data: session, status } = useSession();
-  // console.log(status);
-
-  function logOutUser() {
-    signOut({ callbackUrl: "/login" });
-  }
+  const { data: session } = useSession();
 
   const { isLoadingCount, noOfCartItems } = useContext(CartContext);
+
+  async function logOutUser() {
+    await signOut({ callbackUrl: "/login" });
+  }
 
   return (
     <nav className="bg-[#F5F5F5E5] py-3">
@@ -139,36 +139,37 @@ export default function Navbar() {
                 {session ? (
                   <>
                     <DropdownMenuItem asChild>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
                       <Link href="/changePassword">Change Password</Link>
                     </DropdownMenuItem>
+
                     <DropdownMenuItem asChild>
                       <Link href="/address">Address</Link>
                     </DropdownMenuItem>
+
                     <DropdownMenuItem asChild>
                       <Link href="/allorders">Your Orders</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem
-                        onClick={logOutUser}
-                        className="text-red-600"
-                      >
-                        Log out
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
+
+                    <DropdownMenuItem
+                      onClick={logOutUser}
+                      className="text-red-600"
+                    >
+                      Log out
+                    </DropdownMenuItem>
                   </>
                 ) : (
                   <>
                     <DropdownMenuItem asChild>
                       <Link href="/login">Login</Link>
                     </DropdownMenuItem>
+
                     <DropdownMenuItem asChild>
                       <Link href="/register">Register</Link>
                     </DropdownMenuItem>
                   </>
                 )}
               </DropdownMenuGroup>
+
               <DropdownMenuSeparator />
             </DropdownMenuContent>
           </DropdownMenu>
@@ -183,7 +184,6 @@ export default function Navbar() {
               >
                 <ShoppingCart className="size-6" />
 
-                {/* Badge */}
                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-semibold text-white">
                   {isLoadingCount ? <Spinner /> : noOfCartItems}
                 </span>

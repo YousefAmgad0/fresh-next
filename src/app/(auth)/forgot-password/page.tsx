@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { forgotPassword } from "@/services/auth.services";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,45 +10,69 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
     setLoading(true);
     setMessage("");
+    setIsError(false);
 
     try {
-      const res = await forgotPassword(email);
-      setMessage("Check your email for reset code");
-    } catch (err: any) {
-      setMessage(err.message);
+      const response = await forgotPassword(email.trim());
+
+      setMessage(
+        response.message || "Check your email for the reset code",
+      );
+    } catch (error: unknown) {
+      setIsError(true);
+
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white shadow-xl rounded-xl p-6 space-y-6">
-        <h2 className="text-3xl font-bold text-center">Forgot Password</h2>
+    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md space-y-6 rounded-xl bg-white p-6 shadow-xl">
+        <h2 className="text-center text-3xl font-bold">
+          Forgot Password
+        </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4 ">
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-black transition"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-gray-700"
+            >
+              Email Address
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              className="w-full rounded-lg border border-gray-300 p-3 transition focus:outline-none focus:ring-2 focus:ring-black"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
           <Button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center"
+            className="flex w-full items-center justify-center"
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin w-5 h-5" />
+                <Loader2 className="h-5 w-5 animate-spin" />
                 Sending...
               </>
             ) : (
@@ -57,9 +82,17 @@ export default function ForgotPasswordPage() {
         </form>
 
         {message && (
-          <p className="text-center text-sm text-gray-600">{message}</p>
+          <p
+            role="status"
+            aria-live="polite"
+            className={`text-center text-sm ${
+              isError ? "text-red-600" : "text-green-600"
+            }`}
+          >
+            {message}
+          </p>
         )}
       </div>
-    </div>
+    </main>
   );
 }
