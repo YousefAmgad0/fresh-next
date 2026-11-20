@@ -1,156 +1,107 @@
-"use client";
 
-import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
-import { MapPin, Phone, Mail } from "lucide-react";
 import Link from "next/link";
+import { Banknote, CreditCard } from "lucide-react";
+
+const footerSections = [
+  {
+    title: "Explore",
+    links: [
+      { label: "Home", href: "/" },
+      { label: "Products", href: "/products" },
+      { label: "Categories", href: "/categories" },
+      { label: "Brands", href: "/brands" },
+    ],
+  },
+  {
+    title: "My Account",
+    links: [
+      { label: "Login", href: "/login" },
+      { label: "Register", href: "/register" },
+      { label: "My Orders", href: "/allorders" },
+      { label: "Wishlist", href: "/wishlist" },
+      { label: "Shopping Cart", href: "/cart" },
+      { label: "My Addresses", href: "/address" },
+    ],
+  },
+];
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t py-8">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
-          {/* Logo & Info */}
+    <footer className="border-t border-gray-200 bg-white">
+      <div className="mx-auto max-w-7xl px-6 py-12">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Brand */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Avatar className="rounded-lg w-8 h-8 flex justify-center items-center bg-black text-white font-bold">
-                <AvatarFallback>S</AvatarFallback>
-              </Avatar>
-              <span className="font-bold">ShopMart</span>
-            </div>
-            <p className="text-gray-600 leading-6">
-              Your one-stop destination for the latest technology, fashion, and
-              lifestyle products. Quality guaranteed with fast shipping and
-              excellent customer service.
+            <Link href="/" className="inline-flex items-center gap-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-black font-bold text-white">
+                S
+              </span>
+              <span className="text-xl font-bold text-gray-900">
+                ShopMart
+              </span>
+            </Link>
+
+            <p className="max-w-xs text-sm leading-6 text-gray-600">
+              Discover a wide range of products and enjoy a smooth and
+              convenient online shopping experience.
             </p>
-            <div className="space-y-3 text-gray-600">
-              <div className="flex items-center gap-2">
-                <MapPin size={18} />
-                <span>123 Shop Street, Octoper City, DC 12345</span>
+          </div>
+
+          {/* Navigation Sections */}
+          {footerSections.map((section) => (
+            <div key={section.title}>
+              <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gray-900">
+                {section.title}
+              </h3>
+
+              <ul className="space-y-3">
+                {section.links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-gray-600 transition-colors hover:text-black"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          {/* Payment Methods */}
+          <div>
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-gray-900">
+              Payment Methods
+            </h3>
+
+            <div className="flex flex-wrap gap-3">
+              <div className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
+                <CreditCard size={20} className="text-gray-700" />
+                <span className="text-sm font-medium text-gray-700">
+                  Online Payment
+                </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone size={18} />
-                <span>(+20) 01093333333</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail size={18} />
-                <span>support@shopmart.com</span>
+
+              <div className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2">
+                <Banknote size={20} className="text-gray-700" />
+                <span className="text-sm font-medium text-gray-700">
+                  Cash on Delivery
+                </span>
               </div>
             </div>
-          </div>
 
-          {/* SHOP */}
-          <div>
-            <h3 className="font-bold mb-2">SHOP</h3>
-            <ul className="space-y-2 text-gray-600">
-              <li>
-                <span className="cursor-default">Electronics</span>
-              </li>
-              <li>
-                <span className="cursor-default">Fashion</span>
-              </li>
-              <li>
-                <span className="cursor-default">Home & Garden</span>
-              </li>
-              <li>
-                <span className="cursor-default">Sports</span>
-              </li>
-              <li>
-                <span className="cursor-default">Deals</span>
-              </li>
-            </ul>
+            <p className="mt-3 text-sm leading-6 text-gray-500">
+              Secure online checkout powered by Stripe.
+            </p>
           </div>
+        </div>
 
-          {/* CUSTOMER SERVICE */}
-          <div>
-            <h3 className="font-bold mb-2">CUSTOMER SERVICE</h3>
-            <ul className="space-y-2 text-gray-600">
-              <li>
-                <span className="cursor-default">
-                  Contact Us
-                </span>
-              </li>
-              <li>
-                <span className="cursor-default">
-                  Help Center
-                </span>
-              </li>
-              <li>
-                <span className="cursor-default">
-                  Track Your Order
-                </span>
-              </li>
-              <li>
-                <span className="cursor-default">
-                  Returns & Exchanges
-                </span>
-              </li>
-              <li>
-                <span className="cursor-default">
-                  Size Guide
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          {/* ABOUT */}
-          <div>
-            <h3 className="font-bold mb-2">ABOUT</h3>
-            <ul className="space-y-2 text-gray-600">
-              <li>
-                <span className="cursor-default">
-                  About ShopMart
-                </span>
-              </li>
-              <li>
-                <span className="cursor-default">Careers</span>
-              </li>
-              <li>
-                <span className="cursor-default">Press</span>
-              </li>
-              <li>
-                <span className="cursor-default">
-                  Investor Relations
-                </span>
-              </li>
-              <li>
-                <span className="cursor-default">
-                  Sustainability
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          {/* POLICIES */}
-          <div>
-            <h3 className="font-bold mb-2">POLICIES</h3>
-            <ul className="space-y-2 text-gray-600">
-              <li>
-                <span className="cursor-default">
-                  Privacy Policy
-                </span>
-              </li>
-              <li>
-                <span className="cursor-default">
-                  Terms of Service
-                </span>
-              </li>
-              <li>
-                <span className="cursor-default">
-                  Cookie Policy
-                </span>
-              </li>
-              <li>
-                <span className="cursor-default">
-                  Shipping Policy
-                </span>
-              </li>
-              <li>
-                <span className="cursor-default">
-                  Refund Policy
-                </span>
-              </li>
-            </ul>
-          </div>
+        {/* Copyright */}
+        <div className="mt-12 border-t border-gray-200 pt-6 text-center">
+          <p className="text-sm text-gray-500">
+            © {new Date().getFullYear()} ShopMart. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

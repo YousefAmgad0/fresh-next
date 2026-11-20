@@ -2,13 +2,13 @@
 "use client";
 
 import Link from "next/link";
+import { useContext } from "react";
+import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
+
+import { CartContext } from "@/providers/cart-provider";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,123 +18,107 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Heart, ShoppingCart, User } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
-import { useContext } from "react";
-import { CartContext } from "@/providers/cart-provider";
-import { Spinner } from "../ui/spinner";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Spinner } from "@/components/ui/spinner";
+
+import {
+  Heart,
+  ShoppingCart,
+  UserRound,
+  Menu,
+} from "lucide-react";
+
+const navLinks = [
+  { name: "Products", href: "/products" },
+  { name: "Brands", href: "/brands" },
+  { name: "Categories", href: "/categories" },
+];
 
 export default function Navbar() {
+  const pathname = usePathname();
   const { data: session } = useSession();
-
   const { isLoadingCount, noOfCartItems } = useContext(CartContext);
 
   async function logOutUser() {
     await signOut({ callbackUrl: "/login" });
   }
 
+  function isActiveLink(href: string) {
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
   return (
-    <nav className="bg-[#F5F5F5E5] py-3">
-      <div className="container mx-auto flex flex-wrap justify-between items-center">
+    <nav className="relative z-50 border-b border-gray-200 bg-[#F5F5F5E5]">
+      <div className="container mx-auto flex min-h-16 items-center justify-between gap-3 px-4 sm:px-6">
+
         {/* Logo */}
-        <div className="nav-logo">
-          <Link href="/" className="font-bold flex items-center gap-2">
-            <Avatar className="rounded-lg">
-              <AvatarFallback className="bg-black font-bold rounded-lg text-white">
-                S
-              </AvatarFallback>
-            </Avatar>
-            ShopMart
-          </Link>
-        </div>
+        <Link
+          href="/"
+          aria-label="ShopMart Home"
+          className="flex shrink-0 items-center gap-2 font-bold text-gray-900"
+        >
+          <Avatar className="size-9 rounded-lg">
+            <AvatarFallback className="rounded-lg bg-black font-bold text-white">
+              S
+            </AvatarFallback>
+          </Avatar>
 
-        {/* Links - desktop */}
-        <div className="nav-link hidden md:flex">
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem className="flex items-center gap-4">
-                <NavigationMenuLink asChild>
-                  <Link
-                    href="/products"
-                    className="font-bold px-3 py-1 rounded-md hover:bg-black hover:text-white transition"
-                  >
-                    Products
-                  </Link>
-                </NavigationMenuLink>
+          <span className="text-lg sm:text-xl">ShopMart</span>
+        </Link>
 
-                <NavigationMenuLink asChild>
-                  <Link
-                    href="/brands"
-                    className="font-bold px-3 py-1 rounded-md hover:bg-black hover:text-white transition"
-                  >
-                    Brands
-                  </Link>
-                </NavigationMenuLink>
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-2">
+          {navLinks.map((item) => {
+            const active = isActiveLink(item.href);
 
-                <NavigationMenuLink asChild>
-                  <Link
-                    href="/categories"
-                    className="font-bold px-3 py-1 rounded-md hover:bg-black hover:text-white transition"
-                  >
-                    Categories
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
-
-        {/* Mobile menu button */}
-        <div className="md:hidden">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
-                  <Link href="/products">Products</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/brands">Brands</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/categories">Categories</Link>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 ${
+                  active
+                    ? "bg-black text-white"
+                    : "text-gray-700 hover:bg-gray-200 hover:text-black"
+                }`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Actions */}
-        <div className="nav-action flex items-center gap-2 mt-2 md:mt-0">
-          <p className="font-black text-back capitalize">
-            {session?.user?.name}
-          </p>
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
 
+          {/* User Name */}
+          {session?.user?.name && (
+            <span className="hidden max-w-28 truncate text-sm font-bold capitalize text-gray-900 lg:block">
+              {session.user.name}
+            </span>
+          )}
+
+          {/* Account Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="size-6" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full"
+                aria-label="User account menu"
+              >
+                <UserRound className="size-5 sm:size-6" />
               </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent className="w-36">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuGroup>
                 {session ? (
                   <>
@@ -148,13 +132,6 @@ export default function Navbar() {
 
                     <DropdownMenuItem asChild>
                       <Link href="/allorders">Your Orders</Link>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem
-                      onClick={logOutUser}
-                      className="text-red-600"
-                    >
-                      Log out
                     </DropdownMenuItem>
                   </>
                 ) : (
@@ -170,31 +147,97 @@ export default function Navbar() {
                 )}
               </DropdownMenuGroup>
 
-              <DropdownMenuSeparator />
+              {session && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={logOutUser}
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                  >
+                    Log out
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
 
           {/* Cart */}
-          <div className="relative">
-            <Link href="/cart">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative rounded-full cursor-pointer"
-              >
-                <ShoppingCart className="size-6" />
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="relative rounded-full"
+          >
+            <Link href="/cart" aria-label="Shopping cart">
+              <ShoppingCart className="size-5 sm:size-6" />
 
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-semibold text-white">
-                  {isLoadingCount ? <Spinner /> : noOfCartItems}
-                </span>
-              </Button>
+              <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white">
+                {isLoadingCount ? <Spinner /> : noOfCartItems}
+              </span>
             </Link>
-          </div>
+          </Button>
 
           {/* Wishlist */}
-          <Link href="/wishlist">
-            <Heart className="w-6 h-6 fill-current text-red-600 hover:scale-110 transition-transform duration-200 ml-2" />
-          </Link>
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+          >
+            <Link href="/wishlist" aria-label="Wishlist">
+              <Heart className="size-5 fill-current text-red-600 transition-transform duration-200 hover:scale-110 sm:size-6" />
+            </Link>
+          </Button>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full"
+                  aria-label="Open navigation menu"
+                >
+                  <Menu className="size-6" />
+                </Button>
+              </SheetTrigger>
+
+              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+                <SheetHeader>
+                  <SheetTitle className="text-left text-xl font-bold">
+                    ShopMart
+                  </SheetTitle>
+
+                  <SheetDescription className="text-sm text-gray-500">
+                    Navigate through ShopMart pages.
+                  </SheetDescription>
+                </SheetHeader>
+
+                <div className="mt-6 flex flex-col gap-2">
+                  {navLinks.map((item) => {
+                    const active = isActiveLink(item.href);
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        className={`rounded-lg px-4 py-3 text-sm font-semibold transition-colors ${
+                          active
+                            ? "bg-black text-white"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
         </div>
       </div>
     </nav>
