@@ -9,6 +9,7 @@ import React, { useContext, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
+import Image from "next/image";
 
 export default function CartItems({
   product,
@@ -79,12 +80,13 @@ export default function CartItems({
     <div className="flex items-center justify-between rounded-xl border bg-white p-4 shadow-sm">
       {/* Product Left */}
       <div className="flex items-center gap-4">
-        <img
+        <Image
           src={product.product.imageCover}
           alt={product.product.title}
+          width={112}
+          height={112}
           className="h-24 w-24 rounded-lg object-cover md:h-28 md:w-28"
         />
-
         <div>
           <h3 className="line-clamp-2 text-base font-semibold md:text-lg">
             {product.product.title}
